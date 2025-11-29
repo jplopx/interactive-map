@@ -30,4 +30,4 @@ This module is independent and can be integrated into other systems, including t
 > Developed by João Paulo Lopes (jplopx)  
 > Part of the academic project PetDex (UNISUAM)  
 > [GitHub](https://github.com/jplopx)
-> [LinkedIn](https:/linkedin.com/in/jplopes212/)
+> [LinkedIn](https://linkedin.com/in/jplopes212/)
