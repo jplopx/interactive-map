@@ -1,0 +1,936 @@
+/* style.css — Versão atualizada (botões reorganizados e refinados)
+   Ajustes adicionais para evitar elementos espremidos na search area
+*/
+
+/* =========================
+   VARIABLES
+   ========================= */
+:root {
+  --light-bg: #fffaf6;
+  --surface: #ffffff;
+  --card-bg: #ffffff;
+  --navbar-bg: #ffffff;
+  --header-bg: #ffffff;
+  --footer-bg: #ffffff;
+  --dropdown-bg: #ffffff;
+
+  --text-color: #0f1724;
+  --text-muted: #6b7280;
+  --muted-2: #94a3b8;
+
+  --accent: #f7882f;
+  --accent-2: #ff8a33;
+  --radius: 12px;
+
+  --shadow-1: 0 6px 18px rgba(16,24,40,0.06);
+  --shadow-2: 0 20px 60px rgba(16,24,40,0.08);
+
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --sidebar-width: 460px;
+}
+
+/* =========================
+   DARK THEME
+   ========================= */
+body.dark {
+  --light-bg: #121212;
+  --text-color: #f1f1f1;
+  --text-muted: #bbb;
+  --card-bg: #1e1e1e;
+  --navbar-bg: #1a1a1a;
+  --header-bg: #1a1a1a;
+  --footer-bg: #1a1a1a;
+  --dropdown-bg: #222;
+  --dropdown-border: #333;
+
+  --surface: var(--card-bg);
+  --accent: #f7882f;
+  --accent-2: #ffb47a;
+  --shadow-1: 0 6px 18px rgba(0,0,0,0.6);
+  --shadow-2: 0 20px 60px rgba(0,0,0,0.7);
+}
+
+/* =========================
+   BASE RESET
+   ========================= */
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  height: 100vh;
+  width: 100vw;
+  background: var(--light-bg);
+  color: var(--text-color);
+  overflow: hidden;
+  transition: background .18s ease, color .18s ease;
+}
+
+/* =========================
+   LAYOUT: APP, SIDEBAR, MAP
+   ========================= */
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  gap: 0;
+  align-items: stretch;
+  background: var(--light-bg);
+}
+
+.panel {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  border-right: 1px solid rgba(0,0,0,0.04);
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+
+body.dark .panel { border-right-color: rgba(255,255,255,0.04); }
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  gap: 12px;
+  background: linear-gradient(180deg, var(--header-bg), rgba(0,0,0,0));
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand { display:flex; align-items:center; gap: 12px; }
+.logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;           /* garante que a imagem não escape do formato */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7882f;
+  padding: 0;
+}
+
+.floating-distance-warning {
+  position: absolute;
+  top: 20px;               /* distância do topo da tela */
+  left: 60%;               /* centraliza horizontalmente */
+  transform: translateX(-50%);
+  background: #ffffff;
+  color: #000;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 99999;
+  border: 1px solid rgba(0,0,0,0.1);
+  pointer-events: none;    /* importante: não bloqueia cliques no mapa */
+}
+
+body.dark .floating-distance-warning { background: rgba(18, 18, 18); border: 1px solid rgba(255,255,255,0.04); color: white; }
+
+.logo img {
+  width: 90%;
+  height: 90%;          /* preenche sem distorcer */
+  object-fit: contain;
+}
+.brand-info h1 { margin: 0; font-size: 18px; }
+.subtitle { margin: 0; color: var(--text-muted); font-size: 13px; }
+
+.panel-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Header action buttons */
+.header-actions { display:flex; gap: 8px; align-items:center; }
+.icon-btn {
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.icon-btn:hover { filter: brightness(1.08); box-shadow: 0 0 8px rgba(247,136,47,0.12); }
+
+/* =========================
+   SEARCH AREA
+   - reorganized visually, only CSS changes (no HTML/JS edits)
+   ========================= */
+
+/* Parent container: left = search input, right = compact controls */
+.search-area {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
+  position: relative;
+  flex-wrap: wrap; /* allow wrapping to avoid squeezing */
+}
+
+/* Search input: occupies most of the space, but is allowed to shrink */
+.search-input {
+  flex: 1 1 420px; /* prefer large space but can shrink */
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(2,6,23,0.03);
+  border: 1px solid rgba(2,6,23,0.03);
+  box-shadow: 0 6px 14px rgba(16,24,40,0.03);
+  min-width: 220px; /* prevent collapse */
+}
+
+body.dark .search-input { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); }
+
+.search-input input {
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+  width: 100%;
+  color: var(--text-color);
+}
+
+/* search icon size adjusted for better visual weight */
+.search-ico { color: var(--text-muted); font-size: 20px; }
+
+/* Controls at the right side of the search area (compact group) */
+/* Overriding inline styles by targeting the class directly */
+.search-area .search-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  align-items: flex-end !important;
+  flex: 0 0 auto;
+  min-width: 220px;
+}
+
+/* the internal row (locate + search) */
+.search-area .search-actions > div:first-child {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  width:100%;
+}
+
+/* the filters row inside search-actions */
+.search-area .search-actions > div:last-child {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  width:100%;
+  flex-wrap:wrap;
+}
+
+/* --- Filters Row layout: duas colunas --- */
+.filters-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* 1) garante que o container de chips use linha flex */
+.filters-main .chips {
+  display: flex;
+  gap: 8px;           /* espaçamento entre botões */
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;  /* evita quebra; mude para wrap se quiser que quebre em várias linhas */
+  overflow: auto;     /* permite rolagem horizontal se não couber */
+  width: 100%;
+}
+
+/* 2) garante que cada chip seja inline-flex (para alinhar ícone/texto) */
+.filters-main .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 10px;
+  white-space: nowrap; /* mantém o texto em uma linha */
+  min-width: 0;        /* evita forçar colapso do container */
+}
+
+/* 3) em telas pequenas, permite quebra para evitar overflow exagerado */
+@media (max-width: 600px) {
+  .filters-main .chips {
+    flex-wrap: wrap;    /* agora os chips ocupam mais de uma linha quando necessário */
+    gap: 6px;
+  }
+  .filters-side { width: 100%; align-items: stretch; }
+}
+
+/* Control pills (distance / sort) — compact, clickable */
+.control-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.06);
+  cursor: pointer;
+  font-weight: 700;
+  min-width: 72px;
+  justify-content: center;
+}
+
+/* Keep native select accessible but visually integrated */
+.control-pill select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Buttons general */
+.btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background .12s ease, box-shadow .12s ease, filter .12s ease;
+  min-width: 56px; /* prevent collapse */
+}
+.btn.primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  box-shadow: var(--shadow-1);
+  padding: 8px 12px;
+}
+.btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.06);
+  color: var(--text-muted);
+}
+body.dark .btn.ghost { border-color: rgba(255,255,255,0.04); color: var(--text-muted); }
+
+/* =========================
+   CHIPS (Veterinários / PetShops / ONGs)
+   - slightly more compact and constrained min-width
+   ========================= */
+.chips-row {
+  display:flex;
+  gap: 8px;
+  margin-top: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 6px 10px; /* reduced padding */
+  min-width: 104px; /* prevent extreme shrinking */
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 600;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.chip:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,24,40,0.04); filter: brightness(1.06); }
+.chip.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  border: 0;
+  box-shadow: 0 8px 28px rgba(247,136,47,0.12);
+}
+body.dark .chip { border-color: rgba(255,255,255,0.03); }
+
+/* small control */
+.controls { display:flex; align-items:center; gap: 10px; }
+.small { font-size: 13px; }
+.muted { color: var(--text-muted); }
+
+/* =========================
+   RESULTS HEADER + LIST
+   ========================= */
+.results-header {
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding-top: 6px;
+}
+.results { display:flex; flex-direction: column; gap: 14px; padding-bottom: 18px; }
+
+/* =========================
+   PLACE CARDS (REWORKED)
+   - no images by default
+   ========================= */
+.place {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  padding: 12px;
+  border-radius: 12px;
+  min-height: 92px;
+  background: linear-gradient(180deg, var(--card-bg, #ffffff), rgba(0,0,0,0.01));
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-1);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+body.dark .place {
+  background: var(--card-bg);
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: var(--shadow-2);
+}
+.place:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); }
+
+.place .place-bg { display: none; }
+
+.place-content {
+  display: grid;
+  grid-template-columns: 1fr 12px auto;
+  gap: 12px;
+  width: 100%;
+  align-items: center;
+}
+.place-info { display:flex; flex-direction: column; gap: 6px; min-width:0; }
+.place-info h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vicinity {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* rating small pill */
+.profile-summary { display:flex; gap: 8px; align-items:center; margin-top:2px; }
+.rating-pill {
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  padding:6px 8px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  color: #5b2b00;
+  background: linear-gradient(90deg, #ffd0b8, #ff8a33);
+  box-shadow: 0 6px 18px rgba(255,138,61,0.08);
+}
+
+/* rating reajust */
+.rating-row span:last-child {
+  margin-left: 8px;  /* ajuste como quiser */
+}
+
+/* actions column (right) */
+.place-actions {
+  display:flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 110px;
+  padding-left: 6px;
+}
+.distance-approx { font-weight: 700; color: var(--text-muted); font-size: 13px; margin-bottom: 6px; }
+
+/* main action - Traçar rota (primary) */
+.route-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  box-shadow: 0 10px 30px rgba(247,136,47,0.12);
+  min-width: 64px;
+  transition: box-shadow .12s ease, filter .12s ease;
+}
+
+/* secondary action - subtle */
+.open-profile {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 64px;
+}
+body.dark .open-profile { border-color: rgba(255,255,255,0.04); color: var(--text-muted); }
+
+.route-info { color: var(--text-muted); font-size: 13px; text-align: right; }
+
+/* =========================
+   MAP AREA
+   ========================= */
+.map-wrap {
+  flex: 1;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: #f7f7f7;
+}
+body.dark .map-wrap { background: var(--light-bg);}
+.map { width: 100%; height: 100%; }
+
+.map-controls {
+  position: absolute;
+  top: 8px;
+  right: 6px;
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.map-btn {
+  border:0;
+  background: var(--surface);
+  padding: 13px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+}
+body.dark .map-btn { background: var(--navbar-bg); color: var(--text-color); border: 1px solid rgba(255,255,255,0.04); }
+
+/* =========================
+   MODAL (profile)
+   ========================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+.modal[aria-hidden="false"] { display: flex; }
+
+.modal-panel {
+  width: 820px;
+  max-width: 100%;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 0;
+  position: relative;
+  box-shadow: 0 40px 90px rgba(2,6,23,0.45);
+  overflow: hidden;
+}
+
+.close {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 5;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: #f7882f;
+  color: white;
+}
+
+body.dark .close { background: var(--light-bg); }
+
+.profile-content {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+}
+body.dark .profile-content { background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.45)); }
+
+.profile-header {
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-header h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.meta-block {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.info-row { display:flex; flex-direction: column; gap: 10px; }
+.info-row .line {
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  flex-wrap:wrap;
+  color: var(--text-muted);
+}
+.info-row .line a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.profile-actions {
+  display:flex;
+  gap: 10px;
+  margin-top: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 0;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.06);
+  color: var(--text-muted);
+}
+body.dark .btn-outline { border-color: rgba(255,255,255,0.06); }
+
+/* reviews */
+.reviews {
+  margin-top: 8px;
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 160px;
+  overflow:auto;
+  padding-right: 6px;
+}
+.reviews .rev {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+/* footer */
+.profile-footer {
+  margin-top: 12px;
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* =========================
+   SELECT (distance) STYLING
+   ========================= */
+.select-small {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  padding: 8px 72px 8px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  background: rgba(2,6,23,0.03);
+  border-radius: 999px;
+  border: 1px solid rgba(2,6,23,0.08);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all .18s ease;
+  text-align: center;
+  text-align-last: center;
+  min-width: 120px; /* prevent collapse */
+}
+
+.select-small:hover {
+  filter: brightness(1.12);
+  border-color: rgba(247,136,47,0.25);
+  box-shadow: 0 0 8px rgba(247,136,47,0.12);
+}
+
+.select-small:focus {
+  outline: none;
+  border-color: rgba(247,136,47,0.45);
+  box-shadow: 0 0 0 3px rgba(247,136,47,0.12);
+}
+
+body.dark .select-small {
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  color: var(--text-color);
+}
+
+.select-small::after,
+.select-small::before { display:none !important; content:none !important; }
+
+/* =========================
+   GLOBAL HOVER FEEDBACK
+   ========================= */
+button, .btn, .btn-action, .route-btn, .open-profile,
+.map-btn, .icon-btn, .chip, .select-small {
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+button:hover,
+.btn:hover,
+.btn-action:hover,
+.route-btn:hover,
+.open-profile:hover,
+.map-btn:hover,
+.icon-btn:hover,
+.chip:hover,
+.select-small:hover,
+.profile-actions a:hover,
+#toggleSidebar:hover,
+#darkToggle:hover,
+#locateBtn:hover,
+#searchBtn:hover,
+#clearBtn:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 0 10px rgba(247,136,47,0.18);
+}
+
+.route-btn:hover,
+.btn.primary:hover,
+.btn-action.btn-primary:hover {
+  box-shadow: 0 6px 26px rgba(247,136,47,0.22);
+  transform: translateY(-1px);
+}
+
+body.dark button:hover,
+body.dark .btn:hover,
+body.dark .btn-action:hover,
+body.dark .route-btn:hover,
+body.dark .open-profile:hover,
+body.dark .map-btn:hover,
+body.dark .icon-btn:hover,
+body.dark .chip:hover,
+body.dark .select-small:hover {
+  box-shadow: 0 0 12px rgba(247,150,80,0.18);
+  filter: brightness(1.08);
+}
+
+/* focus */
+button:focus,
+.btn:focus,
+.route-btn:focus,
+.open-profile:focus,
+.select-small:focus {
+  outline: 2px solid rgba(247,136,47,0.12);
+  outline-offset: 2px;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 900px) {
+  :root { --sidebar-width: 100%; }
+
+  .panel {
+    width: 100%;
+    min-width: 100%;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .app { flex-direction: column; }
+
+  .map-wrap {
+    order: 2;
+    height: 50vh;
+  }
+
+  .panel-body {
+    max-height: 45vh;
+    overflow: auto;
+  }
+
+  .map { height: 50vh; }
+
+  .place { min-height: 86px; padding: 10px; }
+
+  .place-content {
+    grid-template-columns: 1fr 8px auto;
+    gap: 8px;
+  }
+
+  .place-actions {
+    min-width: 92px;
+    align-items: flex-end;
+  }
+
+  .route-btn, .open-profile {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .modal-panel {
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .profile-content { padding: 14px; }
+
+  .reviews { max-height: 120px; }
+
+  /* Ensure search area stacks nicely on small screens */
+  .search-input { flex: 1 1 100%; min-width: 0; }
+  .search-area .search-actions { align-items: stretch; min-width: 100%; }
+  .search-area .search-actions > div:last-child { justify-content: space-between; }
+}
+
+/* =========================
+   UTILITIES
+   ========================= */
+.text-muted { color: var(--text-muted); }
+.hidden { display: none !important; }
+.center { display:flex; align-items:center; justify-content:center; }
+
+/* --- Checkbox custom --- */
+.custom-checkbox {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  user-select:none;
+  padding:6px 8px;
+  border-radius:10px;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 4px 10px rgba(2,6,23,0.07);
+}
+
+.custom-checkbox .chk-box {
+  width:20px;
+  height:20px;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(0,0,0,0.08);
+  background: linear-gradient(180deg, #fff, #f7f7f7);
+  box-shadow: 0 4px 10px rgba(2,6,23,0.04);
+}
+
+body.dark .custom-checkbox .chk-box {
+  background: linear-gradient(180deg, #1e1e1e, #141414);
+  border:1px solid rgba(255,255,255,0.04);
+}
+
+.custom-checkbox input[type=checkbox] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+/* ícone de check (invisível por padrão) */
+.custom-checkbox .chk-icon { font-size:16px; display:none; color: white; }
+
+/* quando input checked, mostra o ícone e altera fundo */
+.custom-checkbox input[type=checkbox]:checked + .chk-box {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border: none;
+}
+.custom-checkbox input[type=checkbox]:checked + .chk-box .chk-icon { display:inline-block; }
+
+.custom-checkbox .chk-label { font-size:11px; color:var(--text-muted); font-weight: bold; }
+
+.custom-checkbox:hover { box-shadow: 0 6px 16px rgba(247,136,47,0.06); }
+.custom-checkbox:focus-within { outline: 2px solid rgba(247,136,47,0.12); outline-offset: 2px; }
+
+/* ajuste visual para que o label/checkbox não fiquem muito largos no lado direito */
+.filters-side .custom-checkbox { align-self: flex-end; }
+@media (max-width:900px) { .filters-side .custom-checkbox { align-self: flex-start; } }
+
+/* Garante que o select do lado (sortSelectSide) fica alinhado com o visual do site */
+#sortSelectSide { min-width: 170px; }
+
+/* Pequena melhoria: torna os chips próximos à checkbox em telas largas */
+.chips { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* container do carregamento */
+.results .muted.small {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 500px;            /* centraliza verticalmente */
+    font-size: 0;             /* esconde o texto "Buscando..." */
+    position: relative;
+}
+
+/* loader animado */
+.results .muted.small::after {
+    content: "";
+    width: 28px;
+    height: 28px;
+    border: 4px solid rgba(247, 136, 47, 0.4);
+    border-top-color: #f7882f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* animação do loader */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =========================
+   END
+   ========================= */

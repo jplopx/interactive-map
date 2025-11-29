@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PetDex — Serviços</title>
+
+  <!-- Fonts & icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="floating-distance-warning">
+    <p>As distâncias podem variar!</p>
+  </div>
+
+  <div class="app" id="app">
+    <aside class="panel" id="sidebar" aria-label="Painel lateral">
+      <div class="panel-header">
+        <div class="brand">
+          <div class="logo">
+            <img src="/img/logopetdex.png" alt="Logo PetDex">
+          </div>
+          <div class="brand-info">
+            <h1>PetDex</h1>
+            <p class="subtitle">Encontre serviços pet perto de você</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button id="darkToggle" class="icon-btn" title="Modo escuro / claro" aria-pressed="false">
+            <span id="darkIcon" class="material-icons">dark_mode</span>
+          </button>
+
+          <button id="toggleSidebar" class="icon-btn" title="Abrir/fechar painel">
+            <span class="material-icons">menu</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="search-area" role="search">
+          <div class="search-input" aria-hidden="false">
+            <span class="material-icons search-ico">search</span>
+            <input id="addrInput" type="search" placeholder="Rua, bairro ou cidade" aria-label="Buscar endereço">
+          </div>
+          <div class="search-actions" style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button id="locateBtn" class="btn primary" title="Usar minha localização" aria-label="Usar minha localização">
+                <span class="material-icons">my_location</span>
+              </button>
+              <button id="searchBtn" class="btn ghost" title="Buscar" aria-label="Buscar">Buscar</button>
+            </div>
+
+            <!-- CONTROLES DE FILTRO INLINE (mantive raio e ordenar aqui) -->
+            <div style="display:flex;gap:8px;align-items:center;width:100%;">
+              <label for="distance" class="small muted" style="margin-right:6px;">Raio</label>
+              <select id="distance" class="select-small" aria-label="Raio de busca">
+                <option value="2000">2 km</option>
+                <option value="5000" selected>5 km</option>
+                <option value="8000">8 km</option>
+              </select>
+
+              <label for="sortSelect" class="small muted" style="margin-left:8px; margin-right:6px;">Ordenar</label>
+              <select id="sortSelect" class="select-small" aria-label="Ordenar resultados" style="min-width:170px;">
+                <option value="distance">Distância</option>
+                <option value="rating">Nota</option>
+              </select>
+
+              <!-- botão para limpar filtros 
+              <button id="clearFiltersBtn" class="btn ghost small" title="Limpar filtros" style="margin-left:auto;">Limpar</button> -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Aqui reorganizei os filtros: chips + área lateral para ordenar+checkbox -->
+        <div class="filters-row" role="region" aria-label="Filtros">
+          <div class="filters-main">
+            <div class="chips" id="categoryChips">
+              <button class="chip active" data-cat="veterinario">Veterinários</button>
+              <button class="chip" data-cat="petshop">Pet Shops</button>
+              <button class="chip" data-cat="ong">ONGs</button>
+            </div>
+          </div>
+
+          <div class="filters-side">
+            <!-- Checkbox custom aqui, alinhada abaixo do Sort e ao lado do botão ONGs -->
+            <label class="custom-checkbox" for="filterOpenNow">
+              <input id="filterOpenNow" type="checkbox" aria-label="Apenas abertos agora">
+              <span class="chk-box" aria-hidden="true">
+                <span class="chk-icon material-icons" aria-hidden="true">check</span>
+              </span>
+              <span class="chk-label small muted">Apenas abertos</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="results-header">
+          <h2>Resultados</h2>
+          <div class="muted small" id="resultsCount" aria-live="polite"></div>
+        </div>
+
+        <div id="results" class="results" aria-live="polite">
+          <!-- cards gerados por map.js -->
+        </div>
+      </div>
+    </aside>
+
+    <main class="map-wrap" id="main">
+      <div id="map" class="map" role="application" aria-label="Mapa"></div>
+
+      <div class="map-controls" role="toolbar" aria-label="Controles do mapa">
+        <button id="zoomIn" class="map-btn" title="Aumentar zoom" aria-label="Aumentar zoom">+</button>
+        <button id="zoomOut" class="map-btn" title="Diminuir zoom" aria-label="Diminuir zoom">−</button>
+        <button id="clearBtn" class="map-btn" title="Limpar resultados" aria-label="Limpar resultados">
+          <span class="material-icons">clear</span>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="profileModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Perfil do estabelecimento">
+      <button id="closeModal" class="close" aria-label="Fechar"><span class="material-icons">close</span></button>
+      <div id="profileContent" class="profile-content"></div>
+    </div>
+  </div>
+
+  <!-- Google Maps JS (substitua pela sua chave se quiser) -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=your_google_api_key_here&libraries=places&callback=initMap" async defer></script>
+
+  <script src="map.js" defer></script>
+
+  <script>
+    // sincronizar os dois selects de ordenação (se side for usado, atualiza o principal)
+    document.addEventListener('DOMContentLoaded', function(){
+      const sMain = document.getElementById('sortSelect');
+      const sSide = document.getElementById('sortSelectSide');
+      if (sMain && sSide) {
+        // copy initial value
+        sSide.value = sMain.value;
+        sSide.addEventListener('change', () => { sMain.value = sSide.value; sMain.dispatchEvent(new Event('change', { bubbles: true })); });
+        sMain.addEventListener('change', () => { sSide.value = sMain.value; });
+      }
+
+      // move checkbox state sync (only one input exists: #filterOpenNow)
+      // keep behavior consistent: event bound to #filterOpenNow is already in map.js
+    });
+
+  // remove setas como fallback
+  (function(){
+    function removeSelectArrows() {
+      document.querySelectorAll('.select-small').forEach(function(s){
+        try {
+          s.style.backgroundImage = 'none';
+          s.style.webkitAppearance = 'none';
+          s.style.MozAppearance = 'none';
+          s.style.appearance = 'none';
+          s.style.paddingRight = '12px';
+        } catch(e){ console.warn('select-style fail', e); }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', removeSelectArrows);
+    } else {
+      removeSelectArrows();
+    }
+    setTimeout(removeSelectArrows, 400);
+  })();
+  </script>
+</body>
+</html>
