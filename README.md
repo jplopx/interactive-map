@@ -1,4 +1,4 @@
-# PetDex — Interactive Map
+# PetDex Interactive Map
 
 **PetDex — Interactive Map** is a standalone module of the PetDex project, built to help users locate pet-related services around them.  
 It includes a full interactive interface powered by Google Maps and Google Places, with real-time search, filters, routing, and dark mode.
